@@ -1,0 +1,85 @@
+{
+  type: 'object',
+  properties: {
+    firstname: {
+      type: 'string',
+      minLength: 2,
+      maxLength: 20
+    },
+    lastname: {
+      type: 'string',
+      minLength: 2,
+      maxLength: 20
+    },
+    email: {
+      type: 'string',
+      isEmail: true
+    },
+    password: {
+      type: 'string'
+    },
+    verified: {
+      type: 'boolean',
+      meta: {
+        defaultsTo: false
+      }
+    },
+    gender: {
+      type: 'string',
+      'in': ['unspecified', 'male', 'female'],
+      meta: {
+        defaultsTo: 'unspecified'
+      }
+    },
+    birthday: {
+      type: 'date'
+    },
+    photo: {
+      type: 'object',
+      properties: {
+        file_key: {
+          type: 'integer'
+        },
+        image_url: {
+          type: 'string',
+          isUrl: true
+        }
+      },
+      required: ["file_key", "image_url"]
+    },
+    location: {
+      type: 'object',
+      properties: {
+        lat: {
+          type: 'float'
+        },
+        lng: {
+          type: 'float'
+        }
+      },
+      required: ["lat", "lng"]
+    },
+    credentials: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          provider_id: {
+            type: 'string'
+          },
+          credential_id: {
+            type: 'string'
+          },
+          token: {
+            type: 'string'
+          },
+          secret: {
+            type: 'string'
+          }
+        },
+        required: ["provider_id", "credential_id", "token"]
+      }
+    }
+  },
+  required: ["firstname", "lastname", "email", "password"]
+};
