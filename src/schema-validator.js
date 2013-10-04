@@ -44,15 +44,15 @@
     }
   };
 
-  // Relies on node-validator
+  // TODO: rewrite, isIn, notIn, 
+  // equals?, contains? isAfter, isBefore?
   var validateField = function () {
     var list = [
       'isAlpha', 'isAlphanumeric', 'isEmail', 'isUrl', 'isIP', 'isIPv4',
       'isIPv6', 'isCreditCard', 'isUUID', 'isUUIDv3', 'isUUIDv4',
       'isDate', 'isHexadecimal', 'isHexColor', 'isLowercase',
       'isUppercase', 'notEmpty', 'isAfter', 'isBefore', 'regex',
-      'equals', 'contains', 'notContains', 'isIn', 'notIn', 'min',
-      'max', 'minLength', 'maxLength'];
+      'notRegex', 'equals', 'contains', 'notContains', 'isIn', 'notIn'];
     var i, d = {};
 
     function makeFunction(f) {
@@ -62,6 +62,36 @@
     for (i = 0; i<list.length; i++) {
       d[list[i]] = makeFunction(list[i]);
     }
+
+    d.minLength = function (v, p) {
+      if (v.length < p)
+        throw new Error('too small.');
+    };
+
+    d.maxLength = function (v, p) {
+      if (v.length > p)
+        throw new Error('too large.');
+    };
+
+    d.min = function (v, p) {
+      if (v < p)
+        throw new Error('must be greater than ' + p + '.');
+    };
+
+    d.max = function (v, p) {
+      if (v > p)
+        throw new Error('must be less than ' + p + '.');
+    };
+
+    d.startsWith = function (v, p) {
+      if (typeof v !== 'string' || v.indexOf(p) !== 0)
+        throw new Error('does not start with \''+ p + '\'.');
+    };
+
+    d.endsWith = function (v, p) {
+      if (typeof v !== 'string' || typeof p !== 'string' || v.indexOf(p, v.length - p.length) === -1)
+        throw new Error('does not end with \'' + p + '\'.');
+    };
 
     return d;
   }();
