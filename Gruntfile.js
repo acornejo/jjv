@@ -18,7 +18,9 @@ module.exports = function(grunt) {
       schemaValidator: {
         src: 'src/**/*.js',
         options: {
-          specs: 'spec/*.js'
+          /* keepRunner: true, */
+          specs: 'spec/*.js',
+          vendor: ['node_modules/validator/validator.js']
         }
       }
 

@@ -10,7 +10,6 @@
  */
 
 (function () {
-
   // TODO: Date, Time, Binary
   var enforceType = {
     'string': function (x) {
@@ -47,24 +46,21 @@
 
   // Relies on node-validator
   var validateField = function () {
-    var noParam = ['isAlpha', 'isAlphanumeric', 'isEmail', 'isUrl', 'isIP', 'isIPv4', 'isIPv6', 'isCreditCard', 'isUUID', 'isUUIDv3', 'isUUIDv4', 'isDate', 'isHexadecimal', 'isHexColor', 'isLowercase', 'isUppercase', 'notEmpty'];
-    var withParam = ['isAfter', 'isBefore', 'regex', 'equals', 'contains', 'notContains', 'isIn', 'notIn', 'min', 'max', 'minLength', 'maxLength'];
+    var list = [
+      'isAlpha', 'isAlphanumeric', 'isEmail', 'isUrl', 'isIP', 'isIPv4',
+      'isIPv6', 'isCreditCard', 'isUUID', 'isUUIDv3', 'isUUIDv4',
+      'isDate', 'isHexadecimal', 'isHexColor', 'isLowercase',
+      'isUppercase', 'notEmpty', 'isAfter', 'isBefore', 'regex',
+      'equals', 'contains', 'notContains', 'isIn', 'notIn', 'min',
+      'max', 'minLength', 'maxLength'];
     var i, d = {};
 
-    function makeNoParam(x, name) {
-      return function (x) { check(x)[name](); };
+    function makeFunction(f) {
+      return function (v, p) { check(v)[f](p); };
     }
 
-    function makeWithParam(x, y, name) {
-      return function (x) { check(x)[name](y); };
-    }
-
-    for (i = 0; i<noParam.length; i++) {
-      d[noParam[i]] = makeNoParam(x, noParam[i]);
-    }
-
-    for (i = 0; i<withParam.length; i++) {
-      d[withParam[i]] = makeWithParam(x, y, withParam[i]);
+    for (i = 0; i<list.length; i++) {
+      d[list[i]] = makeFunction(list[i]);
     }
 
     return d;
@@ -80,7 +76,7 @@
     return false;
   };
 
-  var checkProperty = function (schema, object, name) {
+  var checkProperty = function (schema, object, name, required) {
     var p, v, malformed, objerrs, objerr, errors = [];
 
     if (!schema.hasOwnProperty('type'))
@@ -92,51 +88,52 @@
     if (object.hasOwnProperty(name)) {
       // enforce type for object
       try {
-        object[name] = enforceType[schema.type][object];
+        object[name] = enforceType[schema.type](object[name]);
       } catch (err) {
-        return [{name: 'type', args: schema.type, message: err.message}];
+        return [{type: 'type', args: schema.type, message: err.message}];
       }
 
-      if (type === 'object' && schema.hasOwnProperty('properties')) {
+      if (schema.type === 'object' && schema.hasOwnProperty('properties')) {
         malformed = false;
         objerrs = {};
         for (p in schema.properties) {
-          objerr = checkProperty(schema.properties[p], object[name], p);
-          if (objerr !== null) {
+          objerr = checkProperty(schema.properties[p], object[name], p, schema.required);
+          if (objerr.length > 0) {
             objerrs[p] = objerr;
             malformed = true;
           }
         }
         if (malformed)
-          return [{name: 'malformed', args: objerrs, message: 'is malformed.'}];
-      } else if (type === 'array' && schema.hasOwnProperty('items')) {
+          return [{type: 'malformed', args: objerrs, message: 'is malformed.'}];
+      } else if (schema.type === 'array' && schema.hasOwnProperty('items')) {
         malformed = false;
         objerrs = {};
         for (i = 0; i<object[name].length; i++) {
-          objerr = checkProperty(schema.items, object[name][i], i);
-          if (objerr !== null) {
+          objerr = checkProperty(schema.items, object[name][i], schema.required);
+          if (objerr.length > 0 ) {
             objerrs[i] = objerr;
             malformed = true;
           }
         }
         if (malformed)
-          return [{name: 'malformed', args: objerrs, message: 'has malformed items.'}];
+          return [{type: 'malformed', args: objerrs, message: 'has malformed items.'}];
       }
 
       for (v in schema) {
-        if (schema.hasOwnProperty(v) && v !== 'properties' && v !== 'items' && v !== 'type' && v !== 'meta') {
+        if (schema.hasOwnProperty(v) && v !== 'properties' && v !== 'items' && v !== 'type' && v !== 'meta' && v !== 'required') {
           if (!validateField.hasOwnProperty(v))
             throw new Error('schema: property \'' + name + '\' has non-existent validation \'' + v + '\'.');
           try {
+            console.log('validating ' + name + ' with value ' + object[name]);
             validateField[v](object[name], schema[v]);
           } catch(err) {
-            errors.push({name: v, message: err.message});
+            errors.push({type: v, message: err.message});
           }
         }
       }
     } else {
-      if (isRequired(name, schema.required)) 
-        return [{name: 'required', message: 'is required.'}];
+      if (isRequired(name, required)) 
+        return [{type: 'required', message: 'is required.'}];
     }
 
     return errors;
@@ -177,6 +174,7 @@
   };
 
   var schemaValidator = function (schema, object) {
+    var errors = {};
     var hasValidationErrors = false;
     var validationErrors = {};
     var extraFields;
@@ -186,10 +184,12 @@
       throw new Error('schema: root schema must be of type \'object\'.');
     if (schema.hasOwnProperty('properties')) {
       for (p in schema.properties) {
-        properr = checkProperty(schema.properties[p], object, p);
-        if (properr.length > 0){
-          validationErrors[p] = properr;
-          hasValidationErrors = true;
+        if (schema.properties.hasOwnProperty(p)) {
+          properr = checkProperty(schema.properties[p], object, p, schema.required);
+          if (properr.length > 0){
+            validationErrors[p] = properr;
+            hasValidationErrors = true;
+          }
         }
       }
       extraFields = checkExtra(schema, object);
@@ -197,7 +197,7 @@
 
     if (hasValidationErrors)
       errors.validationErrors = validationErrors;
-    if (extraFields > 0)
+    if (extraFields.length > 0)
       errors.extraFields = extraFields;
     return errors;
   };
@@ -205,7 +205,7 @@
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = schemaValidator;
-    }
+    } 
     exports.schemaValidator = schemaValidator;
   } else {
     this.schemaValidator = schemaValidator;
