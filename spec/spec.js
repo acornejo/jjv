@@ -14,7 +14,7 @@ describe("test", function () {
     };
     var object = {'firstname': 'first'};
 
-    expect(schemaValidator(schema, object).validationErrors.lastname[0].type).toEqual('required');
+    expect(schemaValidator(schema, object).validation.lastname.required).toBeDefined();
 
     object.lastname = 'last';
 
@@ -34,12 +34,31 @@ describe("test", function () {
 
     object.gender = '42';
 
-    expect(schemaValidator(schema, object).validationErrors.gender[0].type).toEqual('isAlpha');
+    expect(schemaValidator(schema, object).validation.gender.isAlpha).toBeDefined();
 
     delete schema.properties.gender.isAlpha;
+
+    object.gender = 42;
+
+    expect(schemaValidator(schema, object).validation.gender.type).toBeDefined();
+
+    object.gender = 'whale';
+
+    expect(schemaValidator(schema, object)).toEqual({});
+
+    schema.properties.gender.endsWith = 'ale';
+
+    expect(schemaValidator(schema, object)).toEqual({});
+
+    schema.properties.gender.endsWith = 'xale';
+
+    expect(schemaValidator(schema, object).validation.gender.endsWith).toBeDefined();
+
+    delete schema.properties.gender.endsWith;
+
     schema.properties.gender.isIn = ['male', 'female'];
 
-    expect(schemaValidator(schema, object).validationErrors.gender[0].type).toEqual('isIn');
+    expect(schemaValidator(schema, object).validation.gender.isIn).toBeDefined();
 
     object.gender = 'male';
 
@@ -62,14 +81,14 @@ describe("test", function () {
 
     object.loc = {};
 
-    expect(schemaValidator(schema, object).validationErrors.loc[0].type).toEqual('malformed');
-    expect(schemaValidator(schema, object).validationErrors.loc[0].args.lat[0].type).toEqual('required');
-    expect(schemaValidator(schema, object).validationErrors.loc[0].args.lon[0].type).toEqual('required');
+    expect(schemaValidator(schema, object).validation.loc).toBeDefined();
+    expect(schemaValidator(schema, object).validation.loc.schema.lat.required).toBeDefined();
+    expect(schemaValidator(schema, object).validation.loc.schema.lon.required).toBeDefined();
 
     object.loc = {lat: '44', lon: 23};
 
-    expect(schemaValidator(schema, object).validationErrors.loc[0].type).toEqual('malformed');
-    expect(schemaValidator(schema, object).validationErrors.loc[0].args.lat[0].type).toEqual('type');
+    expect(schemaValidator(schema, object).validation.loc).toBeDefined();
+    expect(schemaValidator(schema, object).validation.loc.schema.lat.type).toBe('number');
 
     object.loc = {lat: 44, lon: 23};
 
@@ -77,7 +96,8 @@ describe("test", function () {
 
     object.nonexistentfield = 'hello there!';
 
-    expect(schemaValidator(schema, object)).toEqual({});
+    expect(schemaValidator(schema, object).additional).toContain('nonexistentfield');
 
+    delete object.nonexistentfield;
   });
 });

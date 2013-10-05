@@ -14,32 +14,32 @@
   var enforceType = {
     'string': function (x) {
       if (typeof x !== 'string')
-        throw new Error('is not a string.');
+        throw new Error('is not a string');
       return x;
     },
     'boolean': function (x) {
       if (typeof x !== 'boolean')
-        throw new Error('is not a boolean.');
+        throw new Error('is not a boolean');
       return x;
     },
     'number': function (x) {
       if (typeof x !== 'number')
-        throw new Error('is not a number.');
+        throw new Error('is not a number');
       return x;
     },
     'integer': function (x) {
       if (typeof x !== 'number' || x % 1 !== 0)
-        throw new Error('is not an integer.');
+        throw new Error('is not an integer');
       return x;
     },
     'object': function (x) {
       if (!x || typeof x !== 'object')
-        throw new Error('is not an object.');
+        throw new Error('is not an object');
       return x;
     },
     'array': function (x) {
       if (!x || typeof x !== 'object' || typeof x.length !== 'number' || toString.call(x) !== '[object Array]')
-        throw new Error('is not an array.');
+        throw new Error('is not an array');
       return x;
     }
   };
@@ -65,32 +65,32 @@
 
     d.minLength = function (v, p) {
       if (v.length < p)
-        throw new Error('too small.');
+        throw new Error('too small');
     };
 
     d.maxLength = function (v, p) {
       if (v.length > p)
-        throw new Error('too large.');
+        throw new Error('too large');
     };
 
     d.min = function (v, p) {
       if (v < p)
-        throw new Error('must be greater than ' + p + '.');
+        throw new Error('too small');
     };
 
     d.max = function (v, p) {
       if (v > p)
-        throw new Error('must be less than ' + p + '.');
+        throw new Error('too large');
     };
 
     d.startsWith = function (v, p) {
       if (typeof v !== 'string' || v.indexOf(p) !== 0)
-        throw new Error('does not start with \''+ p + '\'.');
+        throw new Error('does not start with prefix');
     };
 
     d.endsWith = function (v, p) {
       if (typeof v !== 'string' || typeof p !== 'string' || v.indexOf(p, v.length - p.length) === -1)
-        throw new Error('does not end with \'' + p + '\'.');
+        throw new Error('does not end with suffix');
     };
 
     return d;
@@ -107,7 +107,7 @@
   };
 
   var checkProperty = function (schema, object, name, required) {
-    var p, v, malformed, objerrs, objerr, errors = [];
+    var p, v, malformed, objerrs, objerr, objreq, errors = {};
 
     if (!schema.hasOwnProperty('type'))
       throw new Error('schema: property \'' + name + '\' is missing a type.');
@@ -120,83 +120,84 @@
       try {
         object[name] = enforceType[schema.type](object[name]);
       } catch (err) {
-        return [{type: 'type', args: schema.type, message: err.message}];
+        return {'type': schema.type};
       }
 
       if (schema.type === 'object' && schema.hasOwnProperty('properties')) {
         malformed = false;
         objerrs = {};
+        objreq = [];
         for (p in schema.properties) {
           objerr = checkProperty(schema.properties[p], object[name], p, schema.required);
-          if (objerr.length > 0) {
+          if (objerr !== null) {
             objerrs[p] = objerr;
             malformed = true;
           }
         }
         if (malformed)
-          return [{type: 'malformed', args: objerrs, message: 'is malformed.'}];
+          return {'schema': objerrs};
       } else if (schema.type === 'array' && schema.hasOwnProperty('items')) {
         malformed = false;
         objerrs = {};
         for (i = 0; i<object[name].length; i++) {
-          objerr = checkProperty(schema.items, object[name][i], schema.required);
-          if (objerr.length > 0 ) {
+          objerr = checkProperty(schema.items, object[name], i, schema.required);
+          if (objerr !== null) {
             objerrs[i] = objerr;
             malformed = true;
           }
         }
         if (malformed)
-          return [{type: 'malformed', args: objerrs, message: 'has malformed items.'}];
+          return {'schema': objerrs};
       }
 
+      malformed = false;
+      objerrs = {};
       for (v in schema) {
         if (schema.hasOwnProperty(v) && v !== 'properties' && v !== 'items' && v !== 'type' && v !== 'meta' && v !== 'required') {
           if (!validateField.hasOwnProperty(v))
             throw new Error('schema: property \'' + name + '\' has non-existent validation \'' + v + '\'.');
           try {
-            console.log('validating ' + name + ' with value ' + object[name]);
             validateField[v](object[name], schema[v]);
           } catch(err) {
-            errors.push({type: v, message: err.message});
+            objerrs[v] = true;
+            malformed = true;
           }
         }
       }
+      if (malformed)
+        return objerrs;
     } else {
       if (isRequired(name, required)) 
-        return [{type: 'required', message: 'is required.'}];
+        return {'required': true};
     }
 
-    return errors;
+    return null;
   };
 
-  var checkExtra = function (schema, object, name, remove) {
+  var checkExtra = function (schema, object, name, prefix, remove) {
     var extraFields = [];
     var subfields;
-    var p, v, i;
+    var p, i, j;
 
     remove = typeof remove !== undefined ? remove : false;
 
     if (typeof schema !== 'object' || !schema.hasOwnProperty('type')) {
-      extraFields.push(name);
+      extraFields.push(prefix + (prefix.length > 0 ? '.' : '') + name);
       if (remove)
         delete object[name];
     } else if (schema.type === 'object' && schema.hasOwnProperty('properties')) {
       for (p in object[name])  {
         if (object[name].hasOwnProperty(p)) {
-          subfields = checkExtra(schema.properties[p], object[name], p, remove);
-          for (v in subfields) {
-            if (subfields.hasOwnProperty(v))
-              extraFields.push(name + '.' + v);
-          }
+          subfields = checkExtra(schema.properties[p], object[name], p, prefix + name, remove);
+          for (j = 0; j<subfields.length; j++)
+            extraFields.push(subfields[j]);
         }
       }
     } else if (schema.type === 'array' && schema.hasOwnProperty('items')) {
       for (i = 0; i<object[name].length; i++)  {
-        subfields = checkExtra(schema.items, object[name], i, remove);
-        for (v in subfields) {
-          if (subfields.hasOwnProperty(v))
-            extraFields.push(name + '[' + i.toString() + '].' + v);
-        }
+        subfields = checkExtra(schema.items, object[name], i, prefix + name + '[' + i.toString() + ']', remove);
+        for (j = 0; j<subfields.length; j++)
+          extraFields.push(subfields[j]);
       }
     }
 
@@ -205,30 +206,26 @@
 
   var schemaValidator = function (schema, object) {
     var errors = {};
-    var hasValidationErrors = false;
-    var validationErrors = {};
-    var extraFields;
+    var validation = null;
+    var additional = [];
     var p, properr;
 
     if (!schema.hasOwnProperty('type') && schema.type == 'object')
       throw new Error('schema: root schema must be of type \'object\'.');
     if (schema.hasOwnProperty('properties')) {
-      for (p in schema.properties) {
-        if (schema.properties.hasOwnProperty(p)) {
-          properr = checkProperty(schema.properties[p], object, p, schema.required);
-          if (properr.length > 0){
-            validationErrors[p] = properr;
-            hasValidationErrors = true;
-          }
-        }
-      }
-      extraFields = checkExtra(schema, object);
+      var root_key = '';
+      var root_object = {};
+      root_object[root_key] = object;
+      properr = checkProperty(schema, root_object, root_key, [root_key]);
+      if (properr !== null && properr.hasOwnProperty('schema'))
+        validation = properr.schema;
+      additional = checkExtra(schema, root_object, root_key, '', true);
     }
 
-    if (hasValidationErrors)
-      errors.validationErrors = validationErrors;
-    if (extraFields.length > 0)
-      errors.extraFields = extraFields;
+    if (validation)
+      errors.validation = validation;
+    if (additional.length > 0)
+      errors.additional = additional;
     return errors;
   };
 

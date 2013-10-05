@@ -33,5 +33,3 @@ module.exports = function(grunt) {
   grunt.registerTask('travis', ['jshint', 'jasmine']);
   grunt.registerTask('default', ['jshint', 'uglify', 'jasmine']);
 };
-
-
