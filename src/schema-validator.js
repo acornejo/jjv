@@ -41,6 +41,12 @@
       if (!x || typeof x !== 'object' || typeof x.length !== 'number' || toString.call(x) !== '[object Array]')
         throw new Error('is not an array');
       return x;
+    },
+    'date': function (x) {
+      var d = new Date(x);
+      if (isNaN(d.getTime()))
+          throw new Error('is not a date');
+      return d;
     }
   };
 
@@ -55,8 +61,11 @@
       'notRegex', 'equals', 'contains', 'notContains', 'isIn', 'notIn'];
     var i, d = {};
 
+    if (typeof check === 'undefined' && typeof require !== 'undefined')
+      check = require('validator').check;
+
     function makeFunction(f) {
-      return function (v, p) { check(v)[f](p); };
+      return function (v, p, q) { check(v)[f](p, q); };
     }
 
     for (i = 0; i<list.length; i++) {
