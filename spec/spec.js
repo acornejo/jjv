@@ -99,5 +99,17 @@ describe("test", function () {
     expect(schemaValidator(schema, object).additional).toContain('nonexistentfield');
 
     delete object.nonexistentfield;
+
+    schema.properties.birthdate = {type: 'date'};
+
+    expect(schemaValidator(schema, object)).toEqual({});
+
+    object.birthdate = '';
+
+    expect(schemaValidator(schema, object).validation.birthdate.type).toBeDefined();
+
+    object.birthdate = '03/21/1996';
+
+    expect(schemaValidator(schema, object)).toEqual({});
   });
 });

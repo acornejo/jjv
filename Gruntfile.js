@@ -2,7 +2,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     jshint: {
-      files: ['index.js', 'Gruntfile.js', 'src/**/*.js', 'spec/**/*.js']
+      files: ['index.js', 'Gruntfile.js', 'lib/**/*.js', 'spec/**/*.js']
     },
     uglify: {
       options: {
@@ -10,13 +10,13 @@ module.exports = function(grunt) {
         report: 'gzip'
       },
       schemaValidator: {
-        src: 'src/<%= pkg.name %>.js',
+        src: 'lib/<%= pkg.name %>.js',
         dest: 'build/<%= pkg.name %>.min.js'
       }
     },
     jasmine: {
       schemaValidator: {
-        src: 'src/**/*.js',
+        src: 'lib/**/*.js',
         options: {
           /* keepRunner: true, */
           specs: 'spec/*.js',
