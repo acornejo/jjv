@@ -28,5 +28,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.registerTask('travis', ['jshint', 'mochaTest']);
-  grunt.registerTask('default', ['jshint', 'uglify', 'mochaTest']);
+  grunt.registerTask('default', ['jshint', 'mochaTest', 'uglify']);
 };
