@@ -14,22 +14,19 @@ module.exports = function(grunt) {
         dest: 'build/<%= pkg.name %>.min.js'
       }
     },
-    jasmine: {
-      schemaValidator: {
-        src: 'lib/**/*.js',
+    mochaTest: {
+      test: {
+        src: 'test/**/*.js',
         options: {
-          /* keepRunner: true, */
-          specs: 'spec/*.js',
-          vendor: ['node_modules/validator/validator.js']
+          reporter: 'spec'
         }
       }
-
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.registerTask('travis', ['jshint', 'jasmine']);
-  grunt.registerTask('default', ['jshint', 'uglify', 'jasmine']);
+  grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.registerTask('travis', ['jshint', 'mochaTest']);
+  grunt.registerTask('default', ['jshint', 'uglify', 'mochaTest']);
 };
