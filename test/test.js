@@ -21,19 +21,19 @@ describe("test", function () {
 
     object.lastname = 'last';
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     schema.properties.gender = { type: 'string' };
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     object.gender = 'vampire';
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     schema.properties.gender.isAlpha = true;
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     object.gender = '42';
 
@@ -47,11 +47,11 @@ describe("test", function () {
 
     object.gender = 'whale';
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     schema.properties.gender.endsWith = 'ale';
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     schema.properties.gender.endsWith = 'xale';
 
@@ -65,7 +65,7 @@ describe("test", function () {
 
     object.gender = 'male';
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     schema.properties.loc = {
       type: 'object',
@@ -80,7 +80,7 @@ describe("test", function () {
       required: ["lat", "lon"]
     };
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     object.loc = {};
 
@@ -92,7 +92,7 @@ describe("test", function () {
 
     object.loc = {lat: 44, lon: 23};
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     object.nonexistentfield = 'hello there!';
 
@@ -102,7 +102,7 @@ describe("test", function () {
 
     schema.properties.birthdate = {type: 'date'};
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
 
     object.birthdate = '';
 
@@ -110,6 +110,6 @@ describe("test", function () {
 
     object.birthdate = '03/21/1996';
 
-    expect(schemaValidator(schema, object)).to.be.empty;
+    expect(schemaValidator(schema, object)).to.be.null;
   });
 });
