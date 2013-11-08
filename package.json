@@ -10,13 +10,7 @@
     "mocha": "~1.13.0",
     "grunt-mocha-test": "~0.7.0"
   },
-  "scripts": {
-    "test": "grunt travis --verbose"
-  },
-  "dependencies": {
-    "validator": "~1.5.1",
-    "jsdom": "~0.5.0"
-  },
+  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/acornejo/schema-validator.git",
@@ -28,5 +22,8 @@
       "url": "http://github.com/acornejo/schema-validator/raw/master/LICENSE"
     }
   ],
+  "scripts": {
+    "test": "grunt travis --verbose"
+  },
   "main": "index.js"
 }
