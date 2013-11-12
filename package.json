@@ -23,7 +23,8 @@
     }
   ],
   "scripts": {
-    "test": "grunt travis --verbose"
+    "pretest": "./node_modules/.bin/jshint -e 'js,json' ./lib ./test",
+    "test": "NODE_PATH=./lib ./node_modules/.bin/mocha -b -R spec ./test"
   },
   "main": "index.js"
 }
