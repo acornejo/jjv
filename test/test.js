@@ -201,8 +201,22 @@ var object = {'firstname': 'first', 'lastname': 'last'};
 
     it('invalid', function () {
       object.role = {role_name: 'guest'};
-      console.log(JSON.stringify(schemaValidator(schema, object)));
       expect(schemaValidator(schema, object)).to.have.deep.property('validation.role');
+      object.role = {role_name: 'user'};
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.role');
+      object.role = {role_name: 'admin'};
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.role');
+      object.role = {role_name: 'admin', member_of: []};
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.role');
+      object.role = {role_name: 'user', owner_of: []};
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.role');
+    });
+
+    it('valid', function () {
+      object.role = {role_name: 'admin', owner_of: []};
+      expect(schemaValidator(schema, object)).to.be.null;
+      object.role = {role_name: 'user', member_of: []};
+      expect(schemaValidator(schema, object)).to.be.null;
     });
   });
 
