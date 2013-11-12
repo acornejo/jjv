@@ -45,50 +45,80 @@ var object = {'firstname': 'first', 'lastname': 'last'};
     expect(schemaValidator(schema, object)).to.be.null;
   });
 
-  describe("validators", function () {
-    it("isAlpha", function () {
-      schema.properties.gender = { type: 'string', isAlpha: true };
+  describe("format", function () {
+    it("alpha", function () {
+      schema.properties.gender = { type: 'string', format: "alpha" };
       object.gender = 'undisclosed';
       expect(schemaValidator(schema, object)).to.be.null;
       object.gender = '42';
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.isAlpha', true);
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
     });
 
-    it("endsWith", function () {
-      schema.properties.gender = { type: 'string', endsWith: 'ale' };
-      object.gender= "undefined";
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.endsWith', true);
-      object.gender = "whale";
+    it("alphanumeric", function () {
+      schema.properties.gender = { type: 'string', format: "alphanumeric" };
+      object.gender = 'gogo77';
       expect(schemaValidator(schema, object)).to.be.null;
+      object.gender = 'test%-';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
     });
 
-    it("startsWith", function () {
-      schema.properties.gender = { type: 'string', startsWith: 'm' };
-      object.gender= "female";
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.startsWith', true);
-      object.gender = "male";
+    it("numeric", function () {
+      schema.properties.gender = { type: 'string', format: "numeric" };
+      object.gender = '42';
       expect(schemaValidator(schema, object)).to.be.null;
+      object.gender = 'a42';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
     });
 
-    it("isIn", function () {
-      schema.properties.gender = { type: 'string', isIn: ["male", "female"] };
+    it("hexadecimal", function () {
+      schema.properties.gender = { type: 'string', format: "hexadecimal" };
+      object.gender = 'deadbeef';
+      expect(schemaValidator(schema, object)).to.be.null;
+      object.gender = 'x44';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
+    });
+  });
+
+  describe("generic validators", function () {
+    it("pattern", function () {
+      schema.properties.gender = { type: 'string', pattern: 'ale$' };
       object.gender = 'girl';
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.isIn', true);
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.pattern', true);
       object.gender = 'male';
       expect(schemaValidator(schema, object)).to.be.null;
     });
 
-    it("minLength", function () {
-      schema.properties.firstname.minLength=20;
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.firstname.minLength', true);
-      schema.properties.firstname.minLength=3;
+    it("enum", function () {
+      schema.properties.gender = { type: 'string', enum: ["male", "female"] };
+      object.gender = 'girl';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.enum', true);
+      object.gender = 'male';
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
+  });
+
+  describe("number validators", function () {
+    it("multipleOf", function () {
+      schema.properties.age = { type: 'number', multipleOf: 10 };
+      object.age = 21;
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.age.multipleOf', true);
+      object.age = 20;
       expect(schemaValidator(schema, object)).to.be.null;
     });
 
-    it("maxLength", function () {
-      schema.properties.firstname.maxLength=4;
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.firstname.maxLength', true);
-      schema.properties.firstname.maxLength=20;
+    it("minimum", function () {
+      schema.properties.age = { type: 'number', minimum: 18 };
+      object.age = 17;
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.age.minimum', true);
+      object.age = 18;
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
+
+    it("maximum", function () {
+      schema.properties.age = { type: 'number', maximum: 100 };
+      object.age = 101;
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.age.maximum', true);
+      object.age = 28;
       expect(schemaValidator(schema, object)).to.be.null;
     });
   });
