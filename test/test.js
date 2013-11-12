@@ -1,3 +1,5 @@
+/*jshint expr:true */
+
 var schemaValidator = require('..');
 var expect = require('chai').expect;
 
@@ -18,64 +20,104 @@ var schema = {
 var object = {'firstname': 'first', 'lastname': 'last'};
 
   it("required", function () {
-    expect(schemaValidator(schema, object)).to.be.null;
     delete object.lastname;
     expect(schemaValidator(schema, object)).to.have.deep.property('validation.lastname.required', true);
     object.lastname = 'last';
+    expect(schemaValidator(schema, object)).to.be.null;
   });
 
   it("additional", function () {
     object.nonexistentfield = 'hello there!';
     expect(schemaValidator(schema, object)).to.have.property('additional').that.contain('nonexistentfield');
     delete object.nonexistentfield;
+    expect(schemaValidator(schema, object)).to.be.null;
   });
 
   it("optional", function () {
     schema.properties.gender = { type: 'string' };
+    delete object.gender;
     expect(schemaValidator(schema, object)).to.be.null;
     object.gender = 'vampire';
     expect(schemaValidator(schema, object)).to.be.null;
   });
 
-  it("type", function () {
-    schema.properties.gender = { type: 'string' };
-    object.gender = 42;
-    expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.type', 'string');
-    object.gender = 'whale';
-    expect(schemaValidator(schema, object)).to.be.null;
+  describe("type", function () {
+    it("string", function () {
+      schema.properties.gender = { type: 'string' };
+      object.gender = 42;
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.type', 'string');
+      object.gender = 'whale';
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
+
+    it("number", function () {
+      schema.properties.gender = { type: 'number' };
+      object.gender = 'whale';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.type', 'number');
+      object.gender = 42.5;
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
+
+    it("integer", function () {
+      schema.properties.gender = { type: 'integer' };
+      object.gender = 42.5;
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.type', 'integer');
+      object.gender = 1;
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
+
+    it("boolean", function () {
+      schema.properties.verified = { type: 'boolean' };
+      object.verified = 33;
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.verified.type', 'boolean');
+      object.verified = false;
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
+
+    it("date", function () {
+      schema.properties.birthdate = {type: 'date'};
+      object.birthdate = '';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.birthdate.type', 'date');
+      object.birthdate = '55a';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.birthdate.type', 'date');
+      object.birthdate = '03/21/1996';
+      expect(schemaValidator(schema, object)).to.be.null;
+      object.birthdate = 'now';
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
   });
 
   describe("format", function () {
     it("alpha", function () {
       schema.properties.gender = { type: 'string', format: "alpha" };
+      object.gender = 'a42';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
       object.gender = 'undisclosed';
       expect(schemaValidator(schema, object)).to.be.null;
-      object.gender = '42';
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
-    });
-
-    it("alphanumeric", function () {
-      schema.properties.gender = { type: 'string', format: "alphanumeric" };
-      object.gender = 'gogo77';
-      expect(schemaValidator(schema, object)).to.be.null;
-      object.gender = 'test%-';
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
     });
 
     it("numeric", function () {
       schema.properties.gender = { type: 'string', format: "numeric" };
-      object.gender = '42';
-      expect(schemaValidator(schema, object)).to.be.null;
       object.gender = 'a42';
       expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
+      object.gender = '42';
+      expect(schemaValidator(schema, object)).to.be.null;
+    });
+
+    it("alphanumeric", function () {
+      schema.properties.gender = { type: 'string', format: "alphanumeric" };
+      object.gender = 'test%-';
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
+      object.gender = 'a42';
+      expect(schemaValidator(schema, object)).to.be.null;
     });
 
     it("hexadecimal", function () {
       schema.properties.gender = { type: 'string', format: "hexadecimal" };
-      object.gender = 'deadbeef';
-      expect(schemaValidator(schema, object)).to.be.null;
       object.gender = 'x44';
       expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.format', true);
+      object.gender = 'deadbeef';
+      expect(schemaValidator(schema, object)).to.be.null;
     });
   });
 
@@ -89,7 +131,7 @@ var object = {'firstname': 'first', 'lastname': 'last'};
     });
 
     it("enum", function () {
-      schema.properties.gender = { type: 'string', enum: ["male", "female"] };
+      schema.properties.gender = { type: 'string', 'enum': ["male", "female"] };
       object.gender = 'girl';
       expect(schemaValidator(schema, object)).to.have.deep.property('validation.gender.enum', true);
       object.gender = 'male';
@@ -123,6 +165,48 @@ var object = {'firstname': 'first', 'lastname': 'last'};
     });
   });
 
+  describe('oneof', function () {
+    beforeEach(function () {
+    schema.properties.role = {
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            role_name: {
+              type: 'string',
+              'enum': ['admin']
+            },
+            owner_of: {
+              type: 'array'
+            }
+          },
+          required: ['role_name', 'owner_of']
+        },
+        {
+          type: 'object',
+          properties: {
+            role_name: {
+              type: 'string',
+              'enum': ['user']
+            },
+            member_of: {
+              type: 'array'
+            }
+          },
+          required: ['role_name', 'member_of']
+        }
+      ]
+    };
+    });
+
+    it('invalid', function () {
+      object.role = {role_name: 'guest'};
+      console.log(JSON.stringify(schemaValidator(schema, object)));
+      expect(schemaValidator(schema, object)).to.have.deep.property('validation.role');
+    });
+  });
+
+
   describe("nested objects", function () {
     schema.properties.loc = {
       type: 'object',
@@ -155,18 +239,5 @@ var object = {'firstname': 'first', 'lastname': 'last'};
   });
 
   describe("date", function () {
-    it("invalid", function () {
-      schema.properties.birthdate = {type: 'date'};
-      object.birthdate = '';
-      expect(schemaValidator(schema, object)).to.have.deep.property('validation.birthdate.type', 'date');
-    });
-
-    it("valid", function () {
-      schema.properties.birthdate = {type: 'date'};
-      object.birthdate = '03/21/1996';
-      expect(schemaValidator(schema, object)).to.be.null;
-      object.birthdate = 'now';
-      expect(schemaValidator(schema, object)).to.be.null;
-    });
   });
 });
