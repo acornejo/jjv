@@ -3,12 +3,8 @@
   "version": "0.1.0",
   "author": "Alex Cornejo",
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.1.1",
-    "grunt-contrib-uglify": "~0.2.2",
     "chai": "~1.8.1",
-    "mocha": "~1.13.0",
-    "grunt-mocha-test": "~0.7.0"
+    "mocha": "~1.13.0"
   },
   "dependencies": {},
   "repository": {
@@ -24,7 +20,7 @@
   ],
   "scripts": {
     "pretest": "./node_modules/.bin/jshint -e 'js,json' ./lib ./test",
-    "test": "NODE_PATH=./lib ./node_modules/.bin/mocha -b -R spec ./test"
+    "test": "./node_modules/.bin/mocha -b -R spec ./test"
   },
   "main": "index.js"
 }

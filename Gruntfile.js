@@ -1,9 +1,6 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    jshint: {
-      files: ['index.js', 'Gruntfile.js', 'lib/**/*.js']
-    },
     uglify: {
       options: {
         banner: '/*! <= % pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
@@ -25,8 +22,6 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.registerTask('travis', ['jshint', 'mochaTest']);
-  grunt.registerTask('default', ['jshint', 'mochaTest', 'uglify']);
+  grunt.registerTask('default', ['mochaTest', 'uglify']);
 };
