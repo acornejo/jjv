@@ -4,7 +4,8 @@
   "author": "Alex Cornejo",
   "devDependencies": {
     "chai": "~1.8.1",
-    "mocha": "~1.13.0"
+    "mocha": "~1.13.0",
+    "uglify-js": "~2.4.0" 
   },
   "dependencies": {},
   "repository": {
@@ -19,6 +20,7 @@
     }
   ],
   "scripts": {
+    "prepublish": "./node_modules/.bin/uglifyjs -o build/schema-validator.min.js lib/schema-validator.js",
     "pretest": "./node_modules/.bin/jshint -e 'js,json' ./lib ./test",
     "test": "./node_modules/.bin/mocha -b -R spec ./test"
   },
