@@ -1,5 +1,5 @@
 {
-  "name": "schema-validator",
+  "name": "jjv",
   "version": "0.1.0",
   "author": "Alex Cornejo",
   "devDependencies": {
@@ -10,17 +10,17 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/acornejo/schema-validator.git",
-    "web": "https://github.com/acornejo/schema-validator"
+    "url": "https://github.com/acornejo/jjv.git",
+    "web": "https://github.com/acornejo/jjv"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "http://github.com/acornejo/schema-validator/raw/master/LICENSE"
+      "url": "http://github.com/acornejo/jjv/raw/master/LICENSE"
     }
   ],
   "scripts": {
-    "prepublish": "./node_modules/.bin/uglifyjs -o build/schema-validator.min.js lib/schema-validator.js",
+    "prepublish": "./node_modules/.bin/uglifyjs -o build/jjv.min.js lib/jjv.js",
     "pretest": "./node_modules/.bin/jshint -e 'js,json' ./lib ./test",
     "test": "./node_modules/.bin/mocha -b -R spec ./test"
   },
