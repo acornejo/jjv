@@ -226,14 +226,23 @@ var object = {'firstname': 'first', 'lastname': 'last'};
       location: {
         type: 'object',
         properties: {
-          lat: {
-            type: 'number'
+          address: {
+            type: 'string'
           },
-          lon: {
-            type: 'number'
+          latlng: {
+            type: 'object',
+            properties: {
+              lat: {
+                type: 'number'
+              },
+              lon: {
+                type: 'number'
+              }
+            },
+            required: ['lat', 'lon']
           }
         },
-        required: ['lat', 'lon']
+        required: ['address', 'latlng']
       }
     };
     schema.properties.loc = { $ref: '#/definitions/location' };
@@ -244,13 +253,13 @@ var object = {'firstname': 'first', 'lastname': 'last'};
 
     it("required", function () {
       object.loc = {};
-      expect(jjv(schema, object)).to.have.deep.property('validation.loc.schema').that.deep.equals({lat: {required: true}, lon: {required: true}});
+      expect(jjv(schema, object)).to.have.deep.property('validation.loc.schema').that.deep.equals({address: {required: true}, latlng: {required: true}});
     });
 
     it("type", function () {
-      object.loc = {lat: '44', lon: 23};
-      expect(jjv(schema, object)).to.have.deep.property('validation.loc.schema.lat.type', 'number');
-      object.loc = {lat: 44, lon: 23};
+      object.loc = {latlng: {lat: 44, lon: 23}};
+      expect(jjv(schema, object)).to.have.deep.property('validation.loc.schema.address.required');
+      object.loc = {address: 'some street address', latlng: {lat: 44, lon: 23}};
       expect(jjv(schema, object)).to.be.null;
     });
   });
