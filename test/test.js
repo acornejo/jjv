@@ -1,173 +1,176 @@
 /*jshint expr:true */
 
-var jjv = require('..');
+var jjv = require('..')();
 var expect = require('chai').expect;
 
-
 describe("test", function () {
-var schema = {
-  type: 'object',
-  properties: {
-    firstname: {
-      type: 'string'
+  var user_schema = {
+    type: 'object',
+    properties: {
+      firstname: {
+        type: 'string'
+      },
+      lastname: {
+        type: 'string'
+      }
     },
-    lastname: {
-      type: 'string'
-    }
-  },
-  required: ['firstname', 'lastname']
-};
-var object = {'firstname': 'first', 'lastname': 'last'};
+    required: ['firstname', 'lastname']
+  };
+  var user_object = {'firstname': 'first', 'lastname': 'last'};
+
+  before(function () {
+    jjv.addSchema('user', user_schema);
+  });
 
   it("required", function () {
-    delete object.lastname;
-    expect(jjv(schema, object)).to.have.deep.property('validation.lastname.required', true);
-    object.lastname = 'last';
-    expect(jjv(schema, object)).to.be.null;
+    delete user_object.lastname;
+    expect(jjv.validate('user', user_object)).to.have.deep.property('validation.lastname.required', true);
+    user_object.lastname = 'last';
+    expect(jjv.validate('user', user_object)).to.be.null;
   });
 
   it("additional", function () {
-    object.nonexistentfield = 'hello there!';
-    expect(jjv(schema, object)).to.have.property('additional').that.contain('nonexistentfield');
-    delete object.nonexistentfield;
-    expect(jjv(schema, object)).to.be.null;
+    user_object.nonexistentfield = 'hello there!';
+    expect(jjv.validate('user', user_object)).to.have.property('additional').that.contain('nonexistentfield');
+    delete user_object.nonexistentfield;
+    expect(jjv.validate('user', user_object)).to.be.null;
   });
 
   it("optional", function () {
-    schema.properties.gender = { type: 'string' };
-    delete object.gender;
-    expect(jjv(schema, object)).to.be.null;
-    object.gender = 'vampire';
-    expect(jjv(schema, object)).to.be.null;
+    user_schema.properties.gender = { type: 'string' };
+    delete user_object.gender;
+    expect(jjv.validate('user', user_object)).to.be.null;
+    user_object.gender = 'vampire';
+    expect(jjv.validate('user', user_object)).to.be.null;
   });
 
   describe("type", function () {
     it("string", function () {
-      schema.properties.gender = { type: 'string' };
-      object.gender = 42;
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.type', 'string');
-      object.gender = 'whale';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'string' };
+      user_object.gender = 42;
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.type', 'string');
+      user_object.gender = 'whale';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("number", function () {
-      schema.properties.gender = { type: 'number' };
-      object.gender = 'whale';
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.type', 'number');
-      object.gender = 42.5;
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'number' };
+      user_object.gender = 'whale';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.type', 'number');
+      user_object.gender = 42.5;
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("integer", function () {
-      schema.properties.gender = { type: 'integer' };
-      object.gender = 42.5;
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.type', 'integer');
-      object.gender = 1;
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'integer' };
+      user_object.gender = 42.5;
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.type', 'integer');
+      user_object.gender = 1;
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("boolean", function () {
-      schema.properties.verified = { type: 'boolean' };
-      object.verified = 33;
-      expect(jjv(schema, object)).to.have.deep.property('validation.verified.type', 'boolean');
-      object.verified = false;
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.verified = { type: 'boolean' };
+      user_object.verified = 33;
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.verified.type', 'boolean');
+      user_object.verified = false;
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("date", function () {
-      schema.properties.birthdate = {type: 'date'};
-      object.birthdate = '';
-      expect(jjv(schema, object)).to.have.deep.property('validation.birthdate.type', 'date');
-      object.birthdate = '55a';
-      expect(jjv(schema, object)).to.have.deep.property('validation.birthdate.type', 'date');
-      object.birthdate = '03/21/1996';
-      expect(jjv(schema, object)).to.be.null;
-      object.birthdate = 'now';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.birthdate = {type: 'date'};
+      user_object.birthdate = '';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.birthdate.type', 'date');
+      user_object.birthdate = '55a';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.birthdate.type', 'date');
+      user_object.birthdate = '03/21/1996';
+      expect(jjv.validate('user', user_object)).to.be.null;
+      user_object.birthdate = 'now';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
   });
 
   describe("format", function () {
     it("alpha", function () {
-      schema.properties.gender = { type: 'string', format: "alpha" };
-      object.gender = 'a42';
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.format', true);
-      object.gender = 'undisclosed';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'string', format: "alpha" };
+      user_object.gender = 'a42';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.format', true);
+      user_object.gender = 'undisclosed';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("numeric", function () {
-      schema.properties.gender = { type: 'string', format: "numeric" };
-      object.gender = 'a42';
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.format', true);
-      object.gender = '42';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'string', format: "numeric" };
+      user_object.gender = 'a42';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.format', true);
+      user_object.gender = '42';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("alphanumeric", function () {
-      schema.properties.gender = { type: 'string', format: "alphanumeric" };
-      object.gender = 'test%-';
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.format', true);
-      object.gender = 'a42';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'string', format: "alphanumeric" };
+      user_object.gender = 'test%-';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.format', true);
+      user_object.gender = 'a42';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("hexadecimal", function () {
-      schema.properties.gender = { type: 'string', format: "hexadecimal" };
-      object.gender = 'x44';
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.format', true);
-      object.gender = 'deadbeef';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'string', format: "hexadecimal" };
+      user_object.gender = 'x44';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.format', true);
+      user_object.gender = 'deadbeef';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
   });
 
   describe("generic validators", function () {
     it("pattern", function () {
-      schema.properties.gender = { type: 'string', pattern: 'ale$' };
-      object.gender = 'girl';
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.pattern', true);
-      object.gender = 'male';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'string', pattern: 'ale$' };
+      user_object.gender = 'girl';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.pattern', true);
+      user_object.gender = 'male';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("enum", function () {
-      schema.properties.gender = { type: 'string', 'enum': ["male", "female"] };
-      object.gender = 'girl';
-      expect(jjv(schema, object)).to.have.deep.property('validation.gender.enum', true);
-      object.gender = 'male';
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.gender = { type: 'string', 'enum': ["male", "female"] };
+      user_object.gender = 'girl';
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.gender.enum', true);
+      user_object.gender = 'male';
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
   });
 
   describe("number validators", function () {
     it("multipleOf", function () {
-      schema.properties.age = { type: 'number', multipleOf: 10 };
-      object.age = 21;
-      expect(jjv(schema, object)).to.have.deep.property('validation.age.multipleOf', true);
-      object.age = 20;
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.age = { type: 'number', multipleOf: 10 };
+      user_object.age = 21;
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.age.multipleOf', true);
+      user_object.age = 20;
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("minimum", function () {
-      schema.properties.age = { type: 'number', minimum: 18 };
-      object.age = 17;
-      expect(jjv(schema, object)).to.have.deep.property('validation.age.minimum', true);
-      object.age = 18;
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.age = { type: 'number', minimum: 18 };
+      user_object.age = 17;
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.age.minimum', true);
+      user_object.age = 18;
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("maximum", function () {
-      schema.properties.age = { type: 'number', maximum: 100 };
-      object.age = 101;
-      expect(jjv(schema, object)).to.have.deep.property('validation.age.maximum', true);
-      object.age = 28;
-      expect(jjv(schema, object)).to.be.null;
+      user_schema.properties.age = { type: 'number', maximum: 100 };
+      user_object.age = 101;
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.age.maximum', true);
+      user_object.age = 28;
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
   });
 
   describe('oneof', function () {
     beforeEach(function () {
-    schema.properties.role = {
+    user_schema.properties.role = {
       oneOf: [
         {
           type: 'object',
@@ -200,29 +203,29 @@ var object = {'firstname': 'first', 'lastname': 'last'};
     });
 
     it('invalid', function () {
-      object.role = {role_name: 'guest'};
-      expect(jjv(schema, object)).to.have.deep.property('validation.role');
-      object.role = {role_name: 'user'};
-      expect(jjv(schema, object)).to.have.deep.property('validation.role');
-      object.role = {role_name: 'admin'};
-      expect(jjv(schema, object)).to.have.deep.property('validation.role');
-      object.role = {role_name: 'admin', member_of: []};
-      expect(jjv(schema, object)).to.have.deep.property('validation.role');
-      object.role = {role_name: 'user', owner_of: []};
-      expect(jjv(schema, object)).to.have.deep.property('validation.role');
+      user_object.role = {role_name: 'guest'};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
+      user_object.role = {role_name: 'user'};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
+      user_object.role = {role_name: 'admin'};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
+      user_object.role = {role_name: 'admin', member_of: []};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
+      user_object.role = {role_name: 'user', owner_of: []};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
     });
 
     it('valid', function () {
-      object.role = {role_name: 'admin', owner_of: []};
-      expect(jjv(schema, object)).to.be.null;
-      object.role = {role_name: 'user', member_of: []};
-      expect(jjv(schema, object)).to.be.null;
+      user_object.role = {role_name: 'admin', owner_of: []};
+      expect(jjv.validate('user', user_object)).to.be.null;
+      user_object.role = {role_name: 'user', member_of: []};
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
   });
 
 
   describe("nested objects", function () {
-    schema.definitions = {
+    user_schema.definitions = {
       location: {
         type: 'object',
         properties: {
@@ -245,25 +248,22 @@ var object = {'firstname': 'first', 'lastname': 'last'};
         required: ['address', 'latlng']
       }
     };
-    schema.properties.loc = { $ref: '#/definitions/location' };
+    user_schema.properties.loc = { $ref: '#/definitions/location' };
 
     it("optional", function () {
-      expect(jjv(schema, object)).to.be.null;
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
 
     it("required", function () {
-      object.loc = {};
-      expect(jjv(schema, object)).to.have.deep.property('validation.loc.schema').that.deep.equals({address: {required: true}, latlng: {required: true}});
+      user_object.loc = {};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.loc.schema').that.deep.equals({address: {required: true}, latlng: {required: true}});
     });
 
     it("type", function () {
-      object.loc = {latlng: {lat: 44, lon: 23}};
-      expect(jjv(schema, object)).to.have.deep.property('validation.loc.schema.address.required');
-      object.loc = {address: 'some street address', latlng: {lat: 44, lon: 23}};
-      expect(jjv(schema, object)).to.be.null;
+      user_object.loc = {latlng: {lat: 44, lon: 23}};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.loc.schema.address.required');
+      user_object.loc = {address: 'some street address', latlng: {lat: 44, lon: 23}};
+      expect(jjv.validate('user', user_object)).to.be.null;
     });
-  });
-
-  describe("date", function () {
   });
 });
