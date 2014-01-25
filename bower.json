@@ -1,7 +1,7 @@
 {
   "name": "jjv",
   "main": "lib/jjv.js",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "homepage": "https://github.com/acornejo/jjv",
   "authors": [
     "Alex Cornejo <acornejo@gmail.com>"
