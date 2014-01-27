@@ -16,49 +16,48 @@ named schemas are registered in the environment. Javascript objects can
 then be validated against any registered schema.
 
 ```javascript
-    // create new JJV environment
-    var env = jjv();
+// create new JJV environment
+var env = jjv();
 
-    // Register a `user` schema
-    env.addSchema('user', {
-        type: 'object',
-        properties: {
-            firstname: {
-                type: 'string',
-                minLength: 2
-                maxLength: 15
-            },
-            lastname: {
-                type: 'string',
-                minLength: 2
-                maxLength: 25
-            },
-            gender: {
-                type: 'string',
-                enum: ['male', 'female']
-            },
-            email: {
-                type: 'string',
-                format: 'email'
-            },
-            password: {
-                type: 'string',
-                minLength: 8
-            }
+// Register a `user` schema
+env.addSchema('user', {
+    type: 'object',
+    properties: {
+        firstname: {
+            type: 'string',
+            minLength: 2
+            maxLength: 15
         },
-        required: ['firstname', 'lastname', 'email', 'password']
-    });
+        lastname: {
+            type: 'string',
+            minLength: 2
+            maxLength: 25
+        },
+        gender: {
+            type: 'string',
+            enum: ['male', 'female']
+        },
+        email: {
+            type: 'string',
+            format: 'email'
+        },
+        password: {
+            type: 'string',
+            minLength: 8
+        }
+    },
+    required: ['firstname', 'lastname', 'email', 'password']
+});
 
-    // Perform validation against an incomplete user object (errors will be reported)
-    var errors = env.validate('user', {firstname: 'John', lastname: 'Smith'});
+// Perform validation against an incomplete user object (errors will be reported)
+var errors = env.validate('user', {firstname: 'John', lastname: 'Smith'});
 
-    // validation was successful
-    if (!errors) {
-        alert('User has been validated.')
-    } else {
-        alert('Failed with error object ' + JSON.stringify(errors));
-    }
-
+// validation was successful
+if (!errors) {
+    alert('User has been validated.')
+} else {
+    alert('Failed with error object ' + JSON.stringify(errors));
+}
 ```
 
 ## Advanced Usage
@@ -76,16 +75,15 @@ function. For example, a simple implementation of the `date` type (very
 close to the internal implementation) would be the following:
 
 ```javascript
+// create JJV environment
+var env = jjv();
 
-   // create JJV environment
-   var env = jjv();
-
-   env.addType('date', function (v) {
-      var d = new Date(v);
-      if (isNaN(d.getTime()))
-          throw new Error('is not a date');
-      return d;
-   });
+env.addType('date', function (v) {
+  var d = new Date(v);
+  if (isNaN(d.getTime()))
+      throw new Error('is not a date');
+  return d;
+});
 ```
 
 ### Custom Formats
@@ -95,13 +93,13 @@ the `addFormat` function. For example, the internal implementation of
 the `hexadecimal` string format could be implemented as follows:
 
 ```javascript
-    // create JJV environment
-    var env = jjv();
+// create JJV environment
+var env = jjv();
 
-    env.addFormat('hexadecimal', function (v) {
-        if (typeof v !== 'string' || !(/^[a-fA-F0-9]+$/.test(v)))
-            throw new Error('is not hexadecimal');
-    });
+env.addFormat('hexadecimal', function (v) {
+    if (typeof v !== 'string' || !(/^[a-fA-F0-9]+$/.test(v)))
+        throw new Error('is not hexadecimal');
+});
 ```
 
 ### Custom Checks
@@ -112,11 +110,11 @@ Finally, it is possible to add support for custom checks (i.e.,
 `minLength` check could be implemented as follows:
 
 ```javascript
-    // create JJV environment
-    var env = jjv();
+// create JJV environment
+var env = jjv();
 
-    env.addCheck('minLength', function (v) {
-        if (v.length < p)
-            throw new Error('too small');
-    });
+env.addCheck('minLength', function (v) {
+    if (v.length < p)
+        throw new Error('too small');
+});
 ```
