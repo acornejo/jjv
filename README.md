@@ -75,9 +75,6 @@ function. For example, a simple implementation of the `date` type (very
 close to the internal implementation) would be the following:
 
 ```javascript
-// create JJV environment
-var env = jjv();
-
 env.addType('date', function (v) {
   var d = new Date(v);
   if (isNaN(d.getTime()))
@@ -93,9 +90,6 @@ the `addFormat` function. For example, the internal implementation of
 the `hexadecimal` string format could be implemented as follows:
 
 ```javascript
-// create JJV environment
-var env = jjv();
-
 env.addFormat('hexadecimal', function (v) {
     if (typeof v !== 'string' || !(/^[a-fA-F0-9]+$/.test(v)))
         throw new Error('is not hexadecimal');
@@ -110,9 +104,6 @@ Finally, it is possible to add support for custom checks (i.e.,
 `minLength` check could be implemented as follows:
 
 ```javascript
-// create JJV environment
-var env = jjv();
-
 env.addCheck('minLength', function (v) {
     if (v.length < p)
         throw new Error('too small');
