@@ -115,7 +115,7 @@ Finally, it is possible to add support for custom checks (i.e.,
     // create JJV environment
     var env = jjv();
 
-    env.addFormat('minLength', function (v) {
+    env.addCheck('minLength', function (v) {
         if (v.length < p)
             throw new Error('too small');
     });
