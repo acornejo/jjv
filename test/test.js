@@ -14,6 +14,7 @@ describe("test", function () {
         type: 'string'
       }
     },
+    additionalProperties: false,
     required: ['firstname', 'lastname']
   };
   var user_object = {'firstname': 'first', 'lastname': 'last'};
@@ -31,7 +32,7 @@ describe("test", function () {
 
   it("additional", function () {
     user_object.nonexistentfield = 'hello there!';
-    expect(jjv.validate('user', user_object)).to.have.property('additional').that.contain('nonexistentfield');
+    expect(jjv.validate('user', user_object)).to.have.deep.property('validation.nonexistentfield.additional');
     delete user_object.nonexistentfield;
     expect(jjv.validate('user', user_object)).to.be.null;
   });
