@@ -77,18 +77,6 @@ describe("test", function () {
       user_object.verified = false;
       expect(jjv.validate('user', user_object)).to.be.null;
     });
-
-    it("date", function () {
-      user_schema.properties.birthdate = {type: 'date'};
-      user_object.birthdate = '';
-      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.birthdate.type', 'date');
-      user_object.birthdate = '55a';
-      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.birthdate.type', 'date');
-      user_object.birthdate = '03/21/1996';
-      expect(jjv.validate('user', user_object)).to.be.null;
-      user_object.birthdate = 'now';
-      expect(jjv.validate('user', user_object)).to.be.null;
-    });
   });
 
   describe("format", function () {
