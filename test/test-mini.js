@@ -3,7 +3,7 @@
 var jjv = require('..')();
 var expect = require('chai').expect;
 
-describe("test", function () {
+describe("basic functinal test", function () {
   var user_schema = {
     type: 'object',
     properties: {
