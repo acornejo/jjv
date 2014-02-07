@@ -1,23 +1,26 @@
-# JJV: Javascript JSON Validator
+# JJV: JJV JSON Validator
 
-A simple and extensible Javascript json-schema validator. Runs in the
-browser and in the server (through node.js), it has no dependencies and
-out-of-the-box AMD support.
+A simple and extensible json-schema validator written in javascript. JJV
+runs in the browser and in the server (through node.js), it has no
+dependencies and has out-of-the-box AMD support.
 
-See [json-schema.org](http://json-schema.org) for examples and detailed
-documentation on the specification of JSON-schema. JJV supports the
-latest (v4) JSON Schema Core draft, but due to performance and security
-concerns remote schemas are not fetched. JJV has been tested against the
-latest JSON Schema Test Suite, and passes all tests.
+JJV implements the latest (v4) JSON Schema Core draft, however due to
+performance and security concerns remote schemas are not fetched. To
+ensure compliance JJV is tested against JSON Schema Test Suite published
+by json-schema.org (and passes all tests). For examples and a detailed
+description of the JSON-schema specification visit
+[json-schema.org](http://json-schema.org).
 
-For a performance comparison, see z-schema's
-[benchmarks](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html).
+JJV is fast! For a detailed performance comparison visit z-schema's
+[benchmarks](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html)
+website, which compares various javascript JSON schema validators.
 
 ## Basic Usage
 
 In the most basic usage an environment must be created, and one or more
-named schemas are registered in the environment. Javascript objects can
-then be validated against any registered schema.
+named schemas are registered in the environment (it is also possible to
+register schemas with remote URI's in the same way). Javascript
+objects can then be validated against any registered schema.
 
 ```javascript
 // create new JJV environment
@@ -64,39 +67,53 @@ if (!errors) {
 }
 ```
 
+It is also possible to validate objects against unregistered and/or
+unnamed schemas by supplying the schema object directly. For example:
+
+```
+var env = jjv();
+
+var errors = jjv.validate({
+    type: 'object',
+    properties: {
+        x: {
+            type: 'number'
+        },
+        y: {
+            type: 'number'
+        }
+    },
+    required: ['x', 'y']
+ }, {x: 20, y: 50});
+
+```
+
 ## Advanced Usage
 
-There is built-in support for types `string`, `boolean`, `number`,
-`integer`, `object`, `array` and `date`. The types `date` and `integer`
-are custom JJV extensions not part of the JSON-Schema specification. JJV
-provides mechanisms to add support for custom types, custom formats, and
-custom checks.
+JJV provides mechanisms to add support for custom types, custom formats,
+and custom checks.
 
 ### Custom Types
 
 Support for additional types can be added through the `addType`
-function. For example, a simple implementation of the `date` type (very
-close to the internal implementation) would be the following:
+function. For example, a simple implementation of the `date` type could
+be the following:
 
 ```javascript
 env.addType('date', function (v) {
-  var d = new Date(v);
-  if (isNaN(d.getTime()))
-      throw new Error('is not a date');
-  return d;
+  return !isNan(Date.parse(v));
 });
 ```
 
 ### Custom Formats
 
 It is also possible to add support for additional string formats through
-the `addFormat` function. For example, the internal implementation of
-the `hexadecimal` string format could be implemented as follows:
+the `addFormat` function. For example, an implementation of the
+`hexadecimal` string format (already included) could be as follows:
 
 ```javascript
 env.addFormat('hexadecimal', function (v) {
-    if (typeof v !== 'string' || !(/^[a-fA-F0-9]+$/.test(v)))
-        throw new Error('is not hexadecimal');
+    return (/^[a-fA-F0-9]+$/).test(v);
 });
 ```
 
@@ -104,12 +121,12 @@ env.addFormat('hexadecimal', function (v) {
 
 Finally, it is possible to add support for custom checks (i.e.,
 `minItems`, `maxItems`, `minLength`, `maxLength`, etc.) through the
-`addCheck` function. For example, the internal implementation of the
-`minLength` check could be implemented as follows:
+`addCheck` function. For example, an implementation for an `exactLength`
+validation keyword that supports arrays and strings can be achieved with
+the following:
 
 ```javascript
-env.addCheck('minLength', function (v) {
-    if (v.length < p)
-        throw new Error('too small');
+env.addCheck('exactLength', function (v, p) {
+    return v.length === p;
 });
 ```
