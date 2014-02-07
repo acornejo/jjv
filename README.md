@@ -70,7 +70,7 @@ if (!errors) {
 It is also possible to validate objects against unregistered and/or
 unnamed schemas by supplying the schema object directly. For example:
 
-```
+```javascript
 var env = jjv();
 
 var errors = jjv.validate({
