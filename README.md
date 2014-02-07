@@ -7,7 +7,11 @@ out-of-the-box AMD support.
 See [json-schema.org](http://json-schema.org) for examples and detailed
 documentation on the specification of JSON-schema. JJV supports the
 latest (v4) JSON Schema Core draft, but due to performance and security
-concerns remote schemas are not fetched.
+concerns remote schemas are not fetched. JJV has been tested against the
+latest JSON Schema Test Suite, and passes all tests.
+
+For a performance comparison, see z-schema's
+[benchmarks](https://rawgithub.com/zaggino/z-schema/master/benchmark/results.html).
 
 ## Basic Usage
 
