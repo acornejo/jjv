@@ -88,6 +88,51 @@ var errors = jjv.validate({
 
 ```
 
+## Validation Options
+
+JJV provides options to control the validation of required fields, the
+handling of default values, and the handling of additional properties.
+
+<table>
+    <tr>
+        <th>Option</th>
+        <th>Default</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>checkRequired</td>
+        <td>true</td>
+        <td>If true it reports missing required properties, otherwise it
+        allows missing required properties.</td>
+    </tr>
+    <tr>
+        <td>useDefault</td>
+        <td>true</td>
+        <td>If true it modifies the object to have the default values for
+        missing non-required fields.
+    </td>
+    </tr>
+        <td>removeAdditional</td>
+        <td>false</td>
+        <td>If true it removes all attributes of an object which are not
+        matched by the schema's specification.
+    </tr>
+</table>
+
+The defaults can be overridden for the entire environment or on a
+per-validation basis. For example, to override the checkRequired option
+for the entire environment simply do:
+
+```javascript
+env.defaultOptions.checkRequired=false;
+```
+
+To override the checkRequired option on a per-validation case do:
+
+```
+env.validate('schemaName', object, {checkRequired: false});
+```
+
 ## Advanced Usage
 
 JJV provides mechanisms to add support for custom types, custom formats,
