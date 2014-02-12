@@ -1,1 +1,1 @@
-module.exports = require(__dirname + '/lib/jjv.js');
+module.exports = require('./lib/jjv.js');
