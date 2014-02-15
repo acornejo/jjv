@@ -32,12 +32,12 @@ env.addSchema('user', {
     properties: {
         firstname: {
             type: 'string',
-            minLength: 2
+            minLength: 2,
             maxLength: 15
         },
         lastname: {
             type: 'string',
-            minLength: 2
+            minLength: 2,
             maxLength: 25
         },
         gender: {
@@ -73,7 +73,7 @@ unnamed schemas by supplying the schema object directly. For example:
 ```javascript
 var env = jjv();
 
-var errors = jjv.validate({
+var errors = env.validate({
     type: 'object',
     properties: {
         x: {
