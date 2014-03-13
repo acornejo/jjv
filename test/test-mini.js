@@ -257,9 +257,9 @@ describe("basic functinal test", function () {
     });
   });
 
-  it.skip("registers a schema URI without a trailing #", function () {
+  it("registers a schema URI without a trailing #", function () {
     jjv.addSchema(draft04Schema);
-    expect(jjv.validate(draft04Schema.id, user_schema)).to.be.null;
+    expect(jjv.validate(draft04Schema.id, user_schema, { useDefault: false })).to.be.null;
   });
 
   it("should resolve self-referential absolute URIs with anonymous schemas", function() {
