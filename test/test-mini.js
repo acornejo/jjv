@@ -2,6 +2,7 @@
 
 var jjv = require('..')();
 var expect = require('chai').expect;
+var draft04Schema = require("./draft-04-schema.json");
 
 describe("basic functinal test", function () {
   var user_schema = {
@@ -254,5 +255,46 @@ describe("basic functinal test", function () {
       user_object.loc = {address: 'some street address', latlng: {lat: 44, lon: 23}};
       expect(jjv.validate('user', user_object)).to.be.null;
     });
+  });
+
+  it.skip("registers a schema URI without a trailing #", function () {
+    jjv.addSchema(draft04Schema);
+    expect(jjv.validate(draft04Schema.id, user_schema)).to.be.null;
+  });
+
+  it("should resolve self-referential absolute URIs with anonymous schemas", function() {
+    var selfReferentialSchema = {
+      "$schema": "http://json-schema.org/draft-04/schema",
+      "id": "lib://manifest.json",
+      "title": "Self-referential absolute URI schema",
+      "description": "JSON Schema for node/npm package.json",
+      "$ref": "lib://manifest.json#/definitions/basic",
+      "definitions": {
+        "basic": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "lib://manifest.json#/definitions/name"
+            },
+            "version": {
+              "$ref": "lib://manifest.json#/definitions/semver"
+            }
+          }
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z](?:[_\\.-]?[A-Za-z0-9]+)*$"
+        },
+        "semver": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[a-z]+(?:[_\\.-]*[a-z0-9]+)*)*$"
+        }
+      }
+    };
+    var manifest = {
+      "name": "some-module",
+      "version": "0.1.0"
+    };
+    expect(jjv.validate(selfReferentialSchema, manifest)).to.be.null;
   });
 });
