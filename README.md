@@ -107,11 +107,16 @@ handling of default values, and the handling of additional properties.
     </tr>
     <tr>
         <td>useDefault</td>
-        <td>true</td>
+        <td>false</td>
         <td>If true it modifies the object to have the default values for
-        missing non-required fields.
-    </td>
+        missing non-required fields.</td>
     </tr>
+    <tr>
+        <td>useCoerce</td>
+        <td>false</td>
+        <td>If true it enables type coercion where defined.</td>
+    </tr>
+    <tr>
         <td>removeAdditional</td>
         <td>false</td>
         <td>If true it removes all attributes of an object which are not
@@ -164,7 +169,7 @@ env.addFormat('hexadecimal', function (v) {
 
 ### Custom Checks
 
-Finally, it is possible to add support for custom checks (i.e.,
+It is possible to add support for custom checks (i.e.,
 `minItems`, `maxItems`, `minLength`, `maxLength`, etc.) through the
 `addCheck` function. For example, an implementation for an `exactLength`
 validation keyword that supports arrays and strings can be achieved with
@@ -175,3 +180,27 @@ env.addCheck('exactLength', function (v, p) {
     return v.length === p;
 });
 ```
+
+### Custom Type Coercion
+
+JJV allows custom type coercion rules. As an example, supposed that fields
+which are declared with as type `integer` are sometimes encoded as a string.
+Type coercion allows you to specify that all types declared as `integer` should
+be cast/coerced to an `integer` before performing validation.
+
+```javascript
+env.addTypeCoercion('integer', function (x) {
+    return parseInt(x, 10);
+});
+```
+
+Recall to set the option `useCoerce` to `true` to enable this feature.
+
+## $data v5 proposal
+
+JJV supports the `$data` spec proposed for draft 5 of json-schema,
+complete with relative and absolute JSON pointers.
+
+For information on how to use these feature see the proposal here:
+
+[$data-proposal](https://github.com/json-schema/json-schema/wiki/$data-(v5-proposal)).
