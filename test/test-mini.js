@@ -204,11 +204,16 @@ describe("basic functinal test", function () {
       expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
       user_object.role = {role_name: 'admin', member_of: []};
       expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
-      user_object.role = {role_name: 'admin', member_of: [], super_admin: false};
-      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role.schema.owner_of');
       user_object.role = {role_name: 'user', owner_of: []};
       expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role');
-    });
+
+      user_object.role = {role_name: 'admin', member_of: [], super_admin: false};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role.schema.owner_of');
+      jjv.defaultOptions.useCoerce = true;
+      user_object.role = {role_name: 'admin', member_of: [], super_admin: false};
+      expect(jjv.validate('user', user_object)).to.have.deep.property('validation.role.schema.owner_of');
+      jjv.defaultOptions.useCoerce = false;
+	});
 
     it('valid', function () {
       user_object.role = {role_name: 'admin', owner_of: [], super_admin: true};
