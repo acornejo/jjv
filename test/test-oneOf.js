@@ -3,10 +3,9 @@
 var jjv = require('..')();
 var expect = require('chai').expect;
 
-
-// jjv.defaultOptions.useDefault = true;
-// jjv.defaultOptions.checkRequired = true;
-// jjv.defaultOptions.removeAdditional = true;
+jjv.defaultOptions.useDefault = true;
+jjv.defaultOptions.checkRequired = true;
+jjv.defaultOptions.removeAdditional = true;
 
 describe("oneOf", function () {
   var schema = {
