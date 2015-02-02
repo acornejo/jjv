@@ -1,0 +1,211 @@
+[
+    {
+        "description": "`uri` format in oneOf returns bad error when definition is second",
+        "schema": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "which": {
+                            "type": "string",
+                            "enum": [ "text" ]
+                        },
+                        "value": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "which": {
+                            "type": "string",
+                            "enum": [ "site" ]
+                        },
+                        "value": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    }
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "site oneOf valid",
+                "data": {
+                    "which": "site",
+                    "value": "http://foo.com"
+                },
+                "valid": true
+            },
+            {
+                "description": "text oneOf valid",
+                "data": {
+                    "which": "text",
+                    "value": "Lorem ipsum"
+                },
+                "valid": true
+            },
+            {
+                "description": "site oneOf invalid",
+                "data": {
+                    "which": "site",
+                    "value": "no"
+                },
+                "valid": false,
+                "expected": {
+                    "validation": {
+                        "value": {
+                            "format": true
+                        }
+                    }
+                }
+            },
+            {
+                "description": "text oneOf invalid",
+                "data": {
+                    "which": "text",
+                    "value": ""
+                },
+                "valid": false,
+                "expected": {
+                    "validation": {
+                        "value": {
+                            "minLength": true
+                        }
+                    }
+                }
+            }
+        ]
+    },
+
+    {
+        "description": "`uri` format in oneOf returns correct error when definition is first",
+        "schema": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "which": {
+                            "type": "string",
+                            "enum": [ "site" ]
+                        },
+                        "value": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "which": {
+                            "type": "string",
+                            "enum": [ "text" ]
+                        },
+                        "value": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    }
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "site oneOf valid",
+                "data": {
+                    "which": "site",
+                    "value": "http://foo.com"
+                },
+                "valid": true
+            },
+            {
+                "description": "text oneOf valid",
+                "data": {
+                    "which": "text",
+                    "value": "Lorem ipsum"
+                },
+                "valid": true
+            },
+            {
+                "description": "site oneOf invalid",
+                "data": {
+                    "which": "site",
+                    "value": "no"
+                },
+                "valid": false,
+                "expected": {
+                    "validation": {
+                        "value": {
+                            "format": true
+                        }
+                    }
+                }
+            },
+            {
+                "description": "text oneOf invalid",
+                "data": {
+                    "which": "text",
+                    "value": ""
+                },
+                "valid": false,
+                "expected": {
+                    "validation": {
+                        "value": {
+                            "minLength": true
+                        }
+                    }
+                }
+            }
+        ]
+    },
+
+    {
+        "description": "Only one option of oneOf does not present bug",
+        "schema": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "which": {
+                            "type": "string",
+                            "enum": [ "site" ]
+                        },
+                        "value": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    }
+                }
+            ]
+        },
+        "tests": [
+            {
+                "description": "oneOf valid",
+                "data": {
+                    "which": "site",
+                    "value": "http://foo.com"
+                },
+                "valid": true
+            },
+            {
+                "description": "oneOf invalid",
+                "data": {
+                    "which": "site",
+                    "value": "no"
+                },
+                "valid": false,
+                "expected": {
+                    "validation": {
+                        "value": {
+                            "format": true
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]
