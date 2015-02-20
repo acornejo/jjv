@@ -307,4 +307,31 @@ describe("basic functinal test", function () {
     };
     expect(jjv.validate(selfReferentialSchema, manifest)).to.be.null;
   });
+
+  describe("useDefault", function() {
+    it("should clone default values", function() {
+      var defaults_schema = {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "prop": {
+              "type": "array",
+              "default": []
+            }
+          }
+        }
+      };
+      var defaults_object = [
+        {},
+        {}
+      ];
+      expect(jjv.validate(defaults_schema, defaults_object, {useDefault: true})).to.be.null;
+      expect(defaults_object[0].prop).to.deep.equal([]);
+      expect(defaults_object[1].prop).to.deep.equal([]);
+      defaults_object[0].prop.push(5);
+      expect(defaults_object[0].prop).to.deep.equal([5]);
+      expect(defaults_object[1].prop).to.deep.equal([]);
+    });
+  });
 });
