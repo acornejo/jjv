@@ -334,4 +334,23 @@ describe("basic functinal test", function () {
       expect(defaults_object[1].prop).to.deep.equal([]);
     });
   });
+
+  describe("clone function", function() {
+    it("should handle objects with a hasOwnProperty property", function() {
+      // suppress JSHint warning "'hasOwnProperty' is a really bad name" - we're purposely using really bad names here!
+      /* jshint -W001 */
+      var defaults_schema = {
+        "type": "object",
+        "properties": {
+          "prop": {
+            "type": "object",
+            "default": {"hasOwnProperty": "yes"}
+          }
+        }
+      };
+      var defaults_object = {};
+      expect(jjv.validate(defaults_schema, defaults_object, {useDefault: true})).to.be.null;
+      expect(defaults_object.prop).to.deep.equal({"hasOwnProperty": "yes"});
+    });
+  });
 });
