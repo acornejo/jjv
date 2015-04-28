@@ -64,5 +64,81 @@
                 "valid": false
             }
         ]
+    },
+    {
+        "description": "oneOf, strip other",
+        "schema": {
+            "definition": {
+                "one": {
+                    "title": "schema 1",
+                    "properties": {
+                        "tool" : {"enum": ["set"] },
+                        "field": { "type": "string", "default": "field1"},
+                        "s1" : { "type": "string", "default": "on1"}
+                    },
+                    "required": ["tool"]
+                },
+                "two": {
+                    "title": "schema 2",
+                    "properties": {
+                        "tool" : {"enum": ["set 2"] },
+                        "s2" : { "type": "string", "default": "on2"}
+                    },
+                    "required": ["tool"]
+                 }
+             },
+             "oneOf": [{"$ref": "#/definition/one"}, {"$ref": "#/definition/two"}]
+        },
+        "tests": [
+            {
+                "description": "oneOf valid: get tool 'set', defaults 'field1' & 'on1', strip other",
+                "data": {
+                    "tool": "set",
+                    "other": "remove"
+                },
+                "valid": true,
+		"result": {
+			"tool": "set",
+			"field": "field1",
+			"s1": "on1"
+		},
+		"validateOptions": {"useDefault": true, "removeAdditional": true, "checkRequired": true}
+            }, {
+                "description": "oneOf valid, get set, field met and strip other",
+                "data": {
+                    "tool": "set",
+                    "field": "met",
+                    "other": "remove"
+                },
+                "valid": true,
+		"result": {
+			"tool": "set",
+			"field": "met",
+			"s1": "on1"
+		},
+		"validateOptions": {"useDefault": true, "removeAdditional": true, "checkRequired": true}
+            }, {
+                "description": "oneOf valid, get set 2 and strip other",
+                "data": {
+                    "tool": "set 2",
+                    "other": "remove"
+                },
+                "valid": true,
+		"result": {
+			"tool": "set 2",
+			"s2": "on2"
+		},
+		"validateOptions": {"useDefault": true, "removeAdditional": true, "checkRequired": true}
+            }, {
+                "description": "oneOf invalid due to tool",
+                "data": {
+                    "tool": "unknown",
+                    "other": "remove"
+                },
+                "valid": false,
+		"validateOptions": {"useDefault": true, "removeAdditional": true, "checkRequired": true}
+            }
+        ]
     }
+
 ]
