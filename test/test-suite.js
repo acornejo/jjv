@@ -17,15 +17,20 @@ env.addSchema('http://localhost:1234/subSchemas.json', {
                 "integer": { "type": "integer" },
                 "refToInteger": { "$ref": "#/integer" }
 });
-              
+
 function runTest(i, j, k) {
   var schema = tests[i][j].schema;
   var test = tests[i][j].tests[k];
+  var validateOptions = test.validateOptions || env.defaultOptions;
+  var res = env.validate(schema, test.data, validateOptions);
   it(test.description, function () {
-    if (test.valid)
-      expect(env.validate(schema, test.data)).to.be.equal(null);
-    else
-      expect(env.validate(schema, test.data)).not.to.be.equal(null);
+    if (test.valid) {
+      expect(res).to.be.equal(null);
+      if (test.hasOwnProperty('result'))
+        expect(test.data).to.eql(test.result);
+    } else {
+      expect(res).not.to.be.equal(null);
+    }
   });
 }
 
