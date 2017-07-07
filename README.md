@@ -151,7 +151,7 @@ be the following:
 
 ```javascript
 env.addType('date', function (v) {
-  return !isNan(Date.parse(v));
+  return !isNaN(Date.parse(v));
 });
 ```
 
