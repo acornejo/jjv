@@ -67,6 +67,26 @@ if (!errors) {
 }
 ```
 
+For ease of use, email and uri formats accept a allowEmptyValue configuration
+
+```javascript
+env.addSchema('foo', {
+    type: 'object',
+    properties: {
+        email: {
+            type: 'string',
+            format: 'email',
+            allowEmptyValue: true
+        },
+        uri: {
+            type: 'string',
+            format: 'uri',
+            allowEmptyValue: true
+        }
+    }
+});
+```
+
 It is also possible to validate objects against unregistered and/or
 unnamed schemas by supplying the schema object directly. For example:
 
