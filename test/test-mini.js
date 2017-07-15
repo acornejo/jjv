@@ -315,7 +315,7 @@ describe("basic functinal test", function () {
         "items": {
           "type": "object",
           "properties": {
-            "prop": {
+            "apples": {
               "type": "array",
               "default": []
             }
@@ -327,11 +327,92 @@ describe("basic functinal test", function () {
         {}
       ];
       expect(jjv.validate(defaults_schema, defaults_object, {useDefault: true})).to.be.null;
-      expect(defaults_object[0].prop).to.deep.equal([]);
-      expect(defaults_object[1].prop).to.deep.equal([]);
-      defaults_object[0].prop.push(5);
-      expect(defaults_object[0].prop).to.deep.equal([5]);
-      expect(defaults_object[1].prop).to.deep.equal([]);
+      expect(defaults_object[0].apples).to.deep.equal([]);
+      expect(defaults_object[1].apples).to.deep.equal([]);
+      defaults_object[0].apples.push(5);
+      expect(defaults_object[0].apples).to.deep.equal([5]);
+      expect(defaults_object[1].apples).to.deep.equal([]);
+    });
+
+    user_schema.definitions.path = {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string"
+        },
+        "readings": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object",
+            "default": {lat: 45, lon: 45},
+            "properties": {
+              "lat": {
+                "type": "number"
+              },
+              "lon": {
+                "type": "number"
+              }
+            },
+            "required": ["lat", "lon"]
+          }
+        }
+      },
+      "required": ["device", "readings"]
+    };
+    user_schema.properties.path = { $ref: "#/definitions/path" };
+
+    jjv.coerceType = {
+      array: function(x){
+        if (x === null || x === undefined) return [];
+        if (!Array.isArray(x)) return [x];
+        return x;
+      }
+    };
+
+    it("should not overwrite with a default", function () {
+      user_object.path = {device: "some gps device", readings: {lat: 44, lon: 23}};
+      var err = jjv.validate("user", user_object, {useDefault: true});
+      expect(err).to.have.deep.property("validation.path.schema.readings.type");
+
+      user_object.path = {device: "some gps device", readings: 0};
+      err = jjv.validate("user", user_object, {useDefault: true});
+      expect(err).to.have.deep.property("validation.path.schema.readings.type");
+
+      user_object.path = {device: "some gps device", readings: false};
+      err = jjv.validate("user", user_object, {useDefault: true});
+      expect(err).to.have.deep.property("validation.path.schema.readings.type");
+    });
+
+    it("should validate array items", function () {
+      user_object.path = {device: "some gps device", readings: [{lat: 44, long: 23}]};
+      var err = jjv.validate("user", user_object, {useCoerce: true, useDefault: true});
+      expect(err).to.have.deep.property("validation.path.schema.readings.schema[0].schema.lon.required");
+    });
+
+    it("should coerce and clone default", function () {
+      user_object.path = {device: "some gps device", readings: [{}]};
+      var err = jjv.validate("user", user_object, {useCoerce: true, useDefault: true});
+      expect(err).to.be.null;
+      expect(user_object.path.readings[0].lat).to.equal(45);
+      expect(user_object.path.readings[0].lon).to.equal(45);
+
+      user_object.path = {device: "some gps device", readings: [""]};
+      err = jjv.validate("user", user_object, {useCoerce: true, useDefault: true});
+      expect(err).to.be.null;
+      expect(user_object.path.readings[0].lat).to.equal(45);
+      expect(user_object.path.readings[0].lon).to.equal(45);
+
+      user_object.path = {device: "some gps device", readings: ""};
+      err = jjv.validate("user", user_object, {useCoerce: true, useDefault: true});
+      expect(err).to.be.null;
+      expect(user_object.path.readings[0].lat).to.equal(45);
+      expect(user_object.path.readings[0].lon).to.equal(45);
+    });
+
+    it("should not overwrite valid data", function () {
+      user_object.path = {device: "some gps device", readings: [{lat: 44, lon: 23}]};
+      expect(jjv.validate("user", user_object, {useCoerce: true, useDefault: true})).to.be.null;
     });
   });
 
