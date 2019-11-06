@@ -5,7 +5,7 @@
   "devDependencies": {
     "chai": "~1.8.1",
     "mocha": "~1.13.0",
-    "uglify-js": "~2.4.0",
+    "uglify-js": "~3.6.8",
     "jshint": "~2.3.0"
   },
   "dependencies": {},
